@@ -1,5 +1,6 @@
 import { User } from "../models/users.models.js";
 import bcrypt from "bcrypt";
+import { generateToken } from "../utils/generateToken.js";
 export const signUp = async (req, res) => {
     try {
         const { email, password, name } = req.body;
@@ -11,16 +12,17 @@ export const signUp = async (req, res) => {
         if (userExist) {
             return res.json({ message: "User already exists" });
         }
-        const verificationToken = Math.floor(100000 + Math.random() * 900000);
+        const verificatonToken = Math.floor(100000 + Math.random() * 900000);
         //hash password
         console.log("first")
         const hashPassword = await bcrypt.hash(password, 10);
 
         //create user
-        const user = await User.create({ name, email, password: hashPassword, verificationToken, verificationTokenExpire: Date.now() + 10 * 60 * 1000 });
+        const user = await User.create({ name, email, password: hashPassword, verificatonToken : verificatonToken, verificationTokenExpire: Date.now() + 10 * 60 * 1000 });
+        generateToken(res, user._id);
 
-        
-        user.delete("password")
+       delete user.password;
+       delete user.verificatonToken;
         return res.json({ message: true, user });
     } catch (error) {
         return res.json({ message: error.message });
@@ -50,4 +52,12 @@ export const getAllUsers = async (req, res) => {
 };
 export const signIn = async (req, res) => { };
 export const signOut = async (req, res) => { };
+export const deleteAllUser = async (req, res) => { 
+    try {
+        await User.deleteMany({});
+        return res.json({ message: true });
+    } catch (error) {
+        return res.json({ message: error.message });
+    }
+};
 

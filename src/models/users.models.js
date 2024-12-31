@@ -13,7 +13,7 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    verificatonToken : String,
+    verificatonToken : Number,
     verificationTokenExpire: Date,
 }, { timeDtamps: true });
 
