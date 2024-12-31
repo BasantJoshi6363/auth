@@ -50,7 +50,27 @@ export const getAllUsers = async (req, res) => {
         return res.json({ message: error.message });
     }
 };
-export const signIn = async (req, res) => { };
+export const signIn = async (req, res) => { 
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.json({ message: "Please provide email and password" });
+        }
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.json({ message: "User not found" });
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.json({ message: "Invalid credentials" });
+        }
+        generateToken(res, user._id);
+        delete user.password;
+        return res.json({ message: true, user });
+    } catch (error) {
+        return res.json({ message: error.message });
+    }
+};
 export const signOut = async (req, res) => { };
 export const deleteAllUser = async (req, res) => { 
     try {
